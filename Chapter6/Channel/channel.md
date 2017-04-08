@@ -1,13 +1,15 @@
+## Channel
+
 原子函数和互斥锁会让并发程序的编写更为复杂
 除了原子函数和互斥锁，还可以使用通道来保证对共享资源的安全访问并消除竞争状态
 利用通道，通过发送接收共享资源，在goroutine之间同步
 可以通过通道共享内置类型、命名类型、结构类型和引用类型的值或者指针
 
-// 无缓冲的整型通道
-unbuffered := make(chan int)
+    // 无缓冲的整型通道
+    unbuffered := make(chan int)
 
-// 有缓冲的字符串通道
-buffered := make(chan string, 10)
+    // 有缓冲的字符串通道
+    buffered := make(chan string, 10)
 
 一个发送语句将一个值从一个goroutine通过channel发送到另一个执行接收操作的goroutine。
 发送和接收两个操作都是用<-运算符。在发送语句中，<-运算符分割channel和要发送的值。
