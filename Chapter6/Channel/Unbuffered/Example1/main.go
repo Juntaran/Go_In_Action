@@ -40,7 +40,7 @@ func player(name string, court chan int)  {
 		}
 
 		// 选随机数，根据随机数判断是否丢球
-		n := rand.Intn(100)
+		n := rand.Intn(100)								// Intn(100)在(0,100)随机取一个非负整数
 		if n % 13 == 0 {
 			fmt.Printf("Player %s Missed\n", name)
 			// 关闭通道，失败
