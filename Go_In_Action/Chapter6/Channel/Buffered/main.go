@@ -1,21 +1,21 @@
 /**
- * Author: Juntaran
- * Email:  Jacinthmail@gmail.com
- * Date:   2017/4/10 21:46
- */
+  * Author: Juntaran
+  * Email:  Jacinthmail@gmail.com
+  * Date:   2017/4/10 21:46
+  */
 
 package main
 
 import (
-	"fmt"
-	"math/rand"
 	"sync"
+	"math/rand"
 	"time"
+	"fmt"
 )
 
 const (
-	numberGoroutines = 4  // 要使用的goroutine数量
-	taskLoad         = 10 // 要处理的工作的数量
+	numberGoroutines = 4		// 要使用的goroutine数量
+	taskLoad         = 10		// 要处理的工作的数量
 )
 
 var wg sync.WaitGroup
@@ -26,10 +26,10 @@ func init() {
 }
 
 // worker处理从buffered channel传入的工作
-func worker(tasks chan string, worker int) {
+func worker(tasks chan string, worker int)  {
 	defer wg.Done()
 
-	for { // 死循环
+	for {					// 死循环
 		// 等待分配工作
 		task, ok := <-tasks
 		if !ok {
@@ -56,17 +56,17 @@ func main() {
 	// 启动goroutine来处理工作
 	wg.Add(numberGoroutines)
 
-	for i := 1; i <= numberGoroutines; i++ {
+	for i:=1; i<=numberGoroutines; i++ {
 		go worker(tasks, i)
 	}
 
 	// 增加一组要完成的工作
-	for post := 1; post <= taskLoad; post++ {
+	for post:=1; post<=taskLoad; post++ {
 		tasks <- fmt.Sprintf("Task: %d", post)
 	}
 
 	// 工作完成，退出通道
-	close(tasks) // 关闭通道后，goroutine仍然可以从通道接收数据，但是不能再向其中发送数据
+	close(tasks)		// 关闭通道后，goroutine仍然可以从通道接收数据，但是不能再向其中发送数据
 
 	wg.Wait()
 }

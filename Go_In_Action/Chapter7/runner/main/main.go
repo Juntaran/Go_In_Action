@@ -1,16 +1,16 @@
 /**
-  * Author: Juntaran
-  * Email:  Jacinthmail@gmail.com
-  * Date:   2017/4/11 02:35
-  */
+ * Author: Juntaran
+ * Email:  Jacinthmail@gmail.com
+ * Date:   2017/4/11 02:35
+ */
 
 package main
 
 import (
-	"Go_In_Action/Chapter7/runner"
-	"time"
+	"Go_In_Action/Go_In_Action/Chapter7/runner"
 	"log"
 	"os"
+	"time"
 )
 
 // timeout规定必须在多少秒内完成任务

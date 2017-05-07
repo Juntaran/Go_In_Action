@@ -8,7 +8,7 @@ package main
 
 import (
 	"fmt"
-	"Go_In_Action/Chapter5/访问另一个包隐藏的标识符/Example1/counters"
+	"Go_In_Action/Go_In_Action/Chapter5/访问另一个包隐藏的标识符/Example1/counters"
 )
 
 // 访问另一个包的未公开标识符的值
