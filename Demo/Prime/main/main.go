@@ -6,14 +6,13 @@
 
 package main
 
-import "Go_In_Action/Demo/Prime"
+import (
+	"Go_In_Action/Demo/Prime"
+	"fmt"
+)
 
 func main() {
-	origin, wait := make(chan int), make(chan struct{})
-	Prime.Processor(origin, wait)
-	for num := 2; num < 10000; num++ {
-		origin <- num
-	}
-	close(origin)
-	<- wait
+	ret, count := Prime.GetPrime(10000)
+	fmt.Printf("Prime count is %d\n", count)
+	fmt.Println(ret)
 }
