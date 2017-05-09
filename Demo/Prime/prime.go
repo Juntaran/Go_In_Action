@@ -21,7 +21,6 @@ func processor(seq chan int, wait chan struct{}, ret *[]int)  {
 		}
 		//fmt.Println(prime)
 
-
 		out := make(chan int)
 		processor(out, wait, ret)
 		for num := range seq {
@@ -33,7 +32,6 @@ func processor(seq chan int, wait chan struct{}, ret *[]int)  {
 	} ()
 
 }
-
 
 // 获取小于number的所有质数并返回一个slice以及质数个数
 func GetPrime(number int) ([]int, int) {
