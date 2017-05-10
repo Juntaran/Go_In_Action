@@ -22,6 +22,7 @@ func main() {
 		// 接收操作
 		<- syncChan1
 		for {
+			// ok可以判断通道是否关闭
 			if elem, ok := <-dataChan; ok {
 				fmt.Printf("Received: %d [receiver]\n", elem)
 			} else {
