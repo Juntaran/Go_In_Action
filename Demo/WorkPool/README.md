@@ -6,13 +6,15 @@ Golang工作池
 
 - Linux:
 
-    go build -o queued .  
+
+    go build -o queued .
     ./queued
 
 - Windows:
 
-    cd ~\Go_In_Action\Demo\WorkPool\main  
-    go build main.go  
+
+    cd ~\Go_In_Action\Demo\WorkPool\main
+    go build main.go
     queued.exe
 
 样例程序启动后会在使用8000端口制造一个小型HTTP服务端，  
