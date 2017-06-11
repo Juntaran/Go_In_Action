@@ -1,17 +1,15 @@
 # WorkPool
 
-Golang工作池  
+## Golang工作池  
 
 可以修改`collector`里的具体处理函数  
 
-- Linux:
-
+Linux:
 
     go build -o queued .
     ./queued
 
-- Windows:
-
+Windows:
 
     cd ~\Go_In_Action\Demo\WorkPool\main
     go build main.go
