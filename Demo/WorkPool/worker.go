@@ -32,10 +32,10 @@ func (w Worker) Start() {
 		for {
 			// 添加成员到worker队列
 			w.WorkerPool <- w.Work
-
 			select {
 			case work := <- w.Work:
 				// 接收到一个work请求
+				fmt.Printf("worker: %d do it\n", w.ID)
 				work.Execute(nil)
 			case <- w.QuitChan:
 				// 接收到停止要求
