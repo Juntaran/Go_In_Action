@@ -13,7 +13,7 @@ Windows:
 
     cd ~\Go_In_Action\Demo\WorkPool\main
     go build main.go
-    queued.exe -n=4 -http=localhost:1789
+    queued.exe -n=4 -http=localhost:8000
 
 样例程序启动后会在使用8000端口制造一个小型HTTP服务端，  
 可以使用`curl`来对其进行测试：
