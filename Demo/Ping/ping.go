@@ -1,179 +1,186 @@
 /**
  * Author: Juntaran
  * Email:  Jacinthmail@gmail.com
- * Date:   2017/5/26 0:40
+ * Date:   2017/6/13 13:07
  */
 
 package Ping
 
 import (
 	"errors"
+	"fmt"
+	"math/rand"
 	"net"
-	"time"
 	"os"
-	"bytes"
-	"log"
+	"time"
+	// http://gopm.dn.qbox.me/golang.org/x/net-9c9a3f3e9f9c5c5b124354c89f615e418c7d3537.zip
+	"golang.org/x/net/icmp"
+	"golang.org/x/net/ipv4"
 )
 
-// taken from http://golang.org/src/pkg/net/ipraw_test.go
-
-const (
-	icmpv4EchoRequest = 8
-	icmpv4EchoReply   = 0
-	icmpv6EchoRequest = 128
-	icmpv6EchoReply   = 129
-)
-
-type icmpMessage struct {
-	Type 		int
-	Code 		int
-	Checksum 	int
-	Body 		icmpMessageBody
-}
-
-// icmpMessageBody接口包含了2个方法
-type icmpMessageBody interface {
-	Len() int
-	Marshal() ([]byte, error)
-}
-
-// Marshal方法返回ICMP的二进制request/reply
-func (m *icmpMessage) Marshal() ([]byte, error) {
-	b := []byte{byte(m.Type), byte(m.Code), 0, 0}
-	if m.Body != nil && m.Body.Len() != 0 {
-		mb, err := m.Body.Marshal()
-		if err != nil {
-			return nil, err
-		}
-		b = append(b, mb...)
-	}
-	switch m.Type {
-	case icmpv6EchoRequest, icmpv6EchoReply:
-		return b, nil
-	}
-	// checksum范围
-	csumcv := len(b) - 1
-	s := uint32(0)
-	for i := 0; i < csumcv; i += 2 {
-		s += uint32(b[i+1]) << 8 | uint32(b[i])
-	}
-	if csumcv & 1 == 0 {
-		s += uint32(b[csumcv])
-	}
-	s = s >> 16 + s & 0xffff
-	s = s + s >> 16
-	b[2] ^= byte(^s & 0xff)
-	b[3] ^= byte(^s >> 8)
-	return b, nil
-}
-
-// 解析ICMP消息为icmpMessage
-func parseICMPMessage(b []byte) (*icmpMessage, error) {
-	msglen := len(b)
-	if msglen < 4 {
-		return nil, errors.New("message too short")
-	}
-	m := &icmpMessage{
-		Type: 		int(b[0]),
-		Code: 		int(b[1]),
-		Checksum: 	int(b[2])<<8 | int(b[3]),
-	}
-	if msglen > 4 {
-		var err error
-		switch m.Type {
-		case icmpv4EchoRequest, icmpv4EchoReply, icmpv6EchoRequest, icmpv6EchoReply:
-			m.Body, err = parseICMPEcho(b[4:])
-			if err != nil {
-				return nil, err
-			}
-		}
-	}
-	return m, nil
-}
-
-// icmpEcho代表一个ICMP echo request/reply消息体
-type icmpEcho struct {
-	ID 		int
-	Seq 	int
-	Data 	[]byte
-}
-
-func (p *icmpEcho) Len() int {
-	if p == nil {
-		return 0
-	}
-	return 4 + len(p.Data)
-}
-
-// Marshal方法返回二进制编码的ICMP echo request/reply消息体
-func (p *icmpEcho) Marshal() ([]byte, error) {
-	b := make([]byte, 4+len(p.Data))
-	b[0], b[1] = byte(p.ID >> 8), byte(p.ID & 0xff)
-	b[2], b[3] = byte(p.Seq >> 8), byte(p.Seq & 0xff)
-	copy(b[4:], p.Data)
-	return b, nil
-}
-
-// parseICMPEcho把b解析成一个ICMP echo request/reply消息体
-func parseICMPEcho(b []byte) (*icmpEcho, error) {
-	bodylen := len(b)
-	p := &icmpEcho{
-		ID: int(b[0])<<8 | int(b[1]),
-		Seq: int(b[2])<<8 | int(b[3]),
-	}
-	if bodylen > 4 {
-		p.Data = make([]byte, bodylen-4)
-		copy(p.Data, b[4:])
-	}
-	return p, nil
-}
-
-func Ping(address string, timeout int) error {
-	c, err := net.Dial("ip4:icmp", address)
+func Lookup(host string) (string, error) {
+	addrs, err := net.LookupHost(host)
 	if err != nil {
-		return err
+		return "", err
 	}
-	c.SetDeadline(time.Now().Add(time.Duration(timeout) * time.Second))
-	defer c.Close()
+	if len(addrs) < 1 {
+		return "", errors.New("unknown host")
+	}
+	rd := rand.New(rand.NewSource(time.Now().UnixNano()))
+	return addrs[rd.Intn(len(addrs))], nil
+}
 
-	typ := icmpv4EchoRequest
-	xid, xseq := os.Getpid()&0xffff, 1
-	wb, err := (&icmpMessage{
-		Type: typ, Code: 0,
-		Body: &icmpEcho{
-			ID: xid, Seq: xseq,
-			Data: bytes.Repeat([]byte("Go Go Gadget Ping!!!"), 3),
+var Data = []byte("abcdefghijklmnopqrstuvwabcdefghi")
+
+type Reply struct {
+	Time  int64
+	TTL   uint8
+	Error error
+}
+
+func MarshalMsg(req int, data []byte) ([]byte, error) {
+	xid, xseq := os.Getpid()&0xffff, req
+	wm := icmp.Message{
+		Type: ipv4.ICMPTypeEcho,
+		Code: 0,
+		Body: &icmp.Echo{
+			ID: xid,
+			Seq: xseq,
+			Data: data,
 		},
-	}).Marshal()
+	}
+	return wm.Marshal(nil)
+}
+
+type ping struct {
+	Addr string
+	Conn net.Conn
+	Data []byte
+}
+
+func (self *ping) dail() (err error) {
+	self.Conn, err = net.Dial("ip4:icmp", self.Addr)
 	if err != nil {
 		return err
-	}
-	if _, err = c.Write(wb); err != nil {
-		return err
-	}
-	var m *icmpMessage
-	rb := make([]byte, 20+len(wb))
-	for {
-		if _, err = c.Read(rb); err != nil {
-			return err
-		}
-		rb = ipv4Payload(rb)
-		if m, err = parseICMPMessage(rb); err != nil {
-			return err
-		}
-		switch m.Type {
-		case icmpv4EchoRequest, icmpv6EchoRequest:
-			continue
-		}
-		break
 	}
 	return nil
 }
 
-func ipv4Payload(b []byte) []byte {
-	if len(b) < 20 {
-		return b
+func (self *ping) setDeadline(timeout int) error {
+	return self.Conn.SetDeadline(time.Now().Add(time.Duration(timeout) * time.Second))
+}
+
+func (self *ping) close() error {
+	return self.Conn.Close()
+}
+
+func (self *ping) pingRaw(count int) {
+	if err := self.dail(); err != nil {
+		fmt.Println("Not found remote host")
+		return
 	}
-	hdrlen := int(b[0]&0x0f) << 2
-	return b[hdrlen:]
+	fmt.Println("Start ping from ", self.Conn.LocalAddr())
+	self.setDeadline(10)
+
+	var cnt = 0
+	for {
+		if count > 0 {
+			cnt ++
+			if cnt > count {
+				break
+			}
+		}
+		r := sendPingMsg(self.Conn, self.Data)
+		if r.Error != nil {
+			if opt, ok := r.Error.(*net.OpError); ok && opt.Timeout() {
+				fmt.Printf("From %s reply: TimeOut\n", self.Addr)
+				if err := self.dail(); err != nil {
+					fmt.Println("Not found remote host")
+					return
+				}
+			} else {
+				fmt.Printf("From %s reply: %s\n", self.Addr, r.Error)
+			}
+		} else {
+			fmt.Printf("From %s reply: time=%d ttl=%d\n", self.Addr, r.Time, r.TTL)
+		}
+		time.Sleep(1e9)
+	}
+}
+
+//func (self *ping) PingCount(count int) (reply []Reply) {
+//	if err := self.Dail(); err != nil {
+//		fmt.Println("Not found remote host")
+//		return
+//	}
+//	self.SetDeadline(10)
+//	for i := 0; i < count; i++ {
+//		r := sendPingMsg(self.Conn, self.Data)
+//		reply = append(reply, r)
+//		time.Sleep(1e9)
+//	}
+//	return
+//}
+
+func run(addr string, req int, data []byte) (*ping, error) {
+	wb, err := MarshalMsg(req, data)
+	if err != nil {
+		return nil, err
+	}
+	addr, err = Lookup(addr)
+	if err != nil {
+		return nil, err
+	}
+	return &ping{Data: wb, Addr: addr}, nil
+}
+
+func sendPingMsg(c net.Conn, wb []byte) (reply Reply) {
+	start := time.Now()
+	if _, reply.Error = c.Write(wb); reply.Error != nil {
+		return
+	}
+
+	rb := make([]byte, 1500)
+	var n int
+	n, reply.Error = c.Read(rb)
+	if reply.Error != nil {
+		return
+	}
+
+	duration := time.Now().Sub(start)
+	ttl := uint8(rb[8])
+	rb = func(b []byte) []byte {
+		if len(b) < 20 {
+			return b
+		}
+		hdrlen := int(b[0]&0x0f) << 2
+		return b[hdrlen:]
+	}(rb)
+	var rm *icmp.Message
+	rm, reply.Error = icmp.ParseMessage(1, rb[:n])
+	if reply.Error != nil {
+		return
+	}
+
+	switch rm.Type {
+	case ipv4.ICMPTypeEchoReply:
+		t := int64(duration / time.Millisecond)
+		reply = Reply{t, ttl, nil}
+	case ipv4.ICMPTypeDestinationUnreachable:
+		reply.Error = errors.New("Destination Unreachable")
+	default:
+		reply.Error = fmt.Errorf("Not ICMPTypeEchoReply %v", rm)
+	}
+	return
+}
+
+func Ping(host string, count int)  {
+	ping, err := run(host, 8, Data)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	defer ping.close()
+	ping.pingRaw(count)
+	//fmt.Println(ping.PingCount(6))
 }

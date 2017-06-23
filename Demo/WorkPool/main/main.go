@@ -15,7 +15,7 @@ import (
 
 var (
 	NWorkers = flag.Int("n", 4, "The number of workers to start")
-	HTTPAddr = flag.String("http", "localhost:1789", "Address to listen for HTTP requests on")
+	HTTPAddr = flag.String("http", "localhost:8000", "Address to listen for HTTP requests on")
 )
 
 func main() {

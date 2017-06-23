@@ -12,7 +12,7 @@ Linux:
 Windows:
 
     cd ~\Go_In_Action\Demo\WorkPool\main
-    go build main.go
+    go build -o queued.exe main.go
     queued.exe -n=4 -http=localhost:8000
     
 

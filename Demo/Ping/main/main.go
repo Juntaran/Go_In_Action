@@ -1,13 +1,22 @@
 /**
  * Author: Juntaran
  * Email:  Jacinthmail@gmail.com
- * Date:   2017/5/26 3:28
+ * Date:   2017/6/23 18:58
  */
 
 package main
 
-import "Go_In_Action/Demo/Ping"
+import (
+	"Go_In_Action/Demo/Ping"
+	"flag"
+)
+
+var (
+	host = flag.String("host", "127.0.0.1", "Where are u want to Ping")
+	count = flag.Int("n", 0, "The times of Ping")
+)
 
 func main() {
-	Ping.Ping("www.baiddfdweru.com", 3)
+	flag.Parse()
+	Ping.Ping(*host, *count)
 }

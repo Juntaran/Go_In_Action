@@ -6,7 +6,9 @@
 
 package WorkPool
 
-import "fmt"
+import (
+	"fmt"
+)
 
 type Worker struct {
 	ID 			int						// ID
