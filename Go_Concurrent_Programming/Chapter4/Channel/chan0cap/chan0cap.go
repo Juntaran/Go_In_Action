@@ -16,7 +16,7 @@ func main() {
 	receptionInterval := time.Second * 2
 	intChan := make(chan int, 0)
 
-	go func() {
+	func() {
 		var ts0, ts1 int64
 		for i := 1; i <= 5; i++ {
 			intChan <- i
