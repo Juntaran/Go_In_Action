@@ -177,20 +177,15 @@ func bigReduce(num1, num2 string) (string, error) {
 	len1 := len(num1)
 	len2 := len(num2)
 	lenMax := int(math.Max(float64(len1), float64(len2)))
-	var ret []uint8
+	var ret []int
 	var result string
 	
 	// 判断 num1 和 num2 大小
 	var judge int  = 0
 	if len1 > len2 {
-		// do nothing
+		judge = 1
 	} else if len1 < len2 {
-		ret, err := bigReduce(num2, num1)
-		if err != nil {
-			return "", err
-		} else {
-			return "-" + ret, err
-		}
+		judge = -1
 	} else {
 		// len1 == len2
 		for i := 0; i < len1; i++ {
@@ -205,25 +200,26 @@ func bigReduce(num1, num2 string) (string, error) {
 				break
 			}
 		}
-		switch judge {
-		case 0:
-			return "0", nil
-		case 1:
-			// do nothing
-			break
-		case -1:
-			num1, num2 = num2, num1
-			result = "-"
-		}
+	}
+	switch judge {
+	case 0:			// num1 == num2
+		return "0", nil
+	case 1:			// num1 > num2
+		// do nothing
+		break
+	case -1:		// num1 < num2
+		num1, num2 = num2, num1
+		len1, len2 = len2, len1
+		result = "-"
 	}
 
-	var a = make([]uint8, lenMax)
-	var b = make([]uint8, lenMax)
-	var c = make([]uint8, lenMax)
+	var a = make([]uint8, lenMax+1)
+	var b = make([]uint8, lenMax+1)
+	var c = make([]int, lenMax+1)
 
 	// 检验 num1 和 num2
-	var str1 = make([]uint8, lenMax)
-	var str2 = make([]uint8, lenMax)
+	var str1 = make([]uint8, lenMax+1)
+	var str2 = make([]uint8, lenMax+1)
 
 	for i := 0; i < len1; i++ {
 		str1[i] = num1[i]
@@ -252,7 +248,7 @@ func bigReduce(num1, num2 string) (string, error) {
 	}
 
 	for i := 0; i < lenMax; i++ {
-		c[i] = a[i] - b[i]
+		c[i] = int(a[i]) - int(b[i]) + c[i]
 		if c[i] < 0 {
 			c[i] += 10
 			c[i+1] --
@@ -269,7 +265,7 @@ func bigReduce(num1, num2 string) (string, error) {
 		ret = append(ret, c[j])
 	}
 	for _, v := range ret {
-		result += strconv.Itoa(int(v))
+		result += strconv.Itoa(v)
 	}
 
 	return result, nil

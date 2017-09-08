@@ -12,8 +12,8 @@ import (
 )
 
 func main() {
-	a := "550555"
-	b := "-551555"
+	a := "-1112357657"
+	b := "+45657768"
 
 	c, err1 := BigNumber.BigAdd(a, b)
 	if err1 != nil {
@@ -22,7 +22,7 @@ func main() {
 		fmt.Println(c)
 	}
 
-	ret, err2 := BigNumber.BigReduce(c, b)
+	ret, err2 := BigNumber.BigReduce(c, a)
 	if err2 != nil {
 		fmt.Println(err2)
 	} else {
