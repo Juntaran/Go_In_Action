@@ -134,16 +134,10 @@ func bigAdd(num1, num2 string) (string, error) {
 		}
 	}
 
-	for i := 0; i < lenMax; i++ {
-		if len1 - i - 1 < 0 {
-			b[len2-i-1] = str2[i] - '0'
-			continue
-		}
-		if len2 - i - 1 < 0 {
-			a[len1-i-1] = str1[i] - '0'
-			continue
-		}
+	for i := 0; i < len1; i++ {
 		a[len1-i-1] = str1[i] - '0'
+	}
+	for i := 0; i < len2; i++ {
 		b[len2-i-1] = str2[i] - '0'
 	}
 
@@ -234,16 +228,10 @@ func bigReduce(num1, num2 string) (string, error) {
 		}
 	}
 
-	for i := 0; i < lenMax; i++ {
-		if len1 - i - 1 < 0 {
-			b[len2-i-1] = str2[i] - '0'
-			continue
-		}
-		if len2 - i - 1 < 0 {
-			a[len1-i-1] = str1[i] - '0'
-			continue
-		}
+	for i := 0; i < len1; i++ {
 		a[len1-i-1] = str1[i] - '0'
+	}
+	for i := 0; i < len2; i++ {
 		b[len2-i-1] = str2[i] - '0'
 	}
 
