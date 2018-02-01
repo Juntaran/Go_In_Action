@@ -139,20 +139,33 @@ func (bc *Blockchain) RegisterNode(address string) bool {
 	return bc.nodes.Add(u.Host)
 }
 
+// 解决冲突，取最长链
 func (bc *Blockchain) ResolveConflicts() bool {
 	neighbours := bc.nodes
 	newChain := make([]Block, 0)
+
+	// We're only looking for chains longer than ours
 	maxLength := len(bc.blockchain)
 
+	// Grab and verify the chains from all the nodes in our network
 	for _, node := range neighbours.Keys() {
 		otherBlockchain, err := findExternalChain(node)
 		if err != nil {
 			continue
 		}
-		if otherBlockchain.Length {
 
+		// Check if the length is longer and the chain is valid
+		if otherBlockchain.Length > maxLength && bc.ValidChain(&otherBlockchain.Chain) {
+			maxLength = otherBlockchain.Length
+			newChain = otherBlockchain.Chain
 		}
 	}
+	// Replace our chain if we discovered a new, valid chain longer than ours
+	if len(newChain) > 0 {
+		bc.blockchain = newChain
+		return true
+	}
+	return false
 }
 
 func calHashForBlock(block Block) string {
@@ -176,4 +189,15 @@ func findExternalChain(address string) (blockchainInfo, error) {
 		return bi, nil
 	}
 	return blockchainInfo{}, err
+}
+
+func NewBlockchain() *Blockchain {
+	newBlockchain := &Blockchain{
+		blockchain:        	make([]Block, 0),
+		transaction: 		make([]Transaction, 0),
+		nodes:        		NewStringSet(),
+	}
+	// Initial, sentinel block
+	newBlockchain.NewBlock(100, "1")
+	return newBlockchain
 }
