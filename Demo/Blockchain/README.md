@@ -2,4 +2,4 @@
 
 ## Reference
 
-*[gochain](https://github.com/crisadamo/gochain)
+* [gochain](https://github.com/crisadamo/gochain)
