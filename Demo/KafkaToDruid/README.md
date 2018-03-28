@@ -61,13 +61,13 @@ bin/tranquility server -configFile ./conf/test.json
 go run main.go > ret.txt
 ```
 
-## 中间件处理策略:  
+## 中间件处理策略:  
 
 1. 读取 yaml 文件，获得 `kafka-topic`、`topic` 以及每个 topic 对应的 `partition`  
 2. 分别对每个 topic 的 partition 开启一个新 goroutine  
-3. 每个 goroutine 连接 kafka 拉取对应 `topic` 对应 `partition` 的数据  
+3. 每个 goroutine 连接 kafka 拉取对应 `topic` 对应 `partition` 的数据  
 4. 数据转换为 json 格式，该格式与 `tranquility` 的 `miuiServer.json` 对应  
-5. json 以 `HTTP POST` 方式打入 `tranquility`，由 tranquility 自动打入 druid  
+5. json 以 `HTTP POST` 方式打入 `tranquility`，由 tranquility 自动打入 druid  
 
 
 ## 存在的问题:  
