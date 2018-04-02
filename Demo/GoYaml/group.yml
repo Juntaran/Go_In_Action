@@ -1,0 +1,7 @@
+group:
+- groupname: groupTest1
+  previlege:
+  - tagname: tag1
+    tagprev: admin
+  - tagname: tag1
+    tagprev: user
