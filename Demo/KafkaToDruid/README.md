@@ -33,7 +33,7 @@ log_format milog '$http_host\t$server_addr\t$hostname\t$remote_addr\t$http_x_for
 13 scheme
 ```
 
-## 日志处理流程:  
+## 日志处理流程:  
 
 NginxLog -> td_agent -> lcs -> kafka -> `kafkaConsumer -> kafka2json -> postDruid` -> tranquility -> druid
 
@@ -67,19 +67,19 @@ bin/tranquility server -configFile ./conf/miuiServer.json
 go run main.go > ret.txt
 ```
 
-## 中间件处理策略:  
+## 中间件处理策略:  
 
 1. 热更新组件，定时查询 yaml 配置文件 md5 是否有改变，如果有增加会开启新的 goroutine 支持，不能减少
-2. 读取 yaml 文件，获得 `kafka-topic`、`topic` 以及每个 topic 对应的 `partition`  
+2. 读取 yaml 文件，获得 `kafka-topic`、`topic` 以及每个 topic 对应的 `partition`  
 3. 分别对每个 topic 的 partition 开启一个新 goroutine  
-4. 每个 goroutine 连接 kafka 拉取对应 `topic` 对应 `partition` 的数据  
-5. 数据转换为 json 格式，该格式与 `tranquility` 的 `miuiServer.json` 对应  
-6. json 以 `HTTP POST` 方式打入 `tranquility`，由 tranquility 自动打入 druid  
+4. 每个 goroutine 连接 kafka 拉取对应 `topic` 对应 `partition` 的数据  
+5. 数据转换为 json 格式，该格式与 `tranquility` 的 `miuiServer.json` 对应  
+6. json 以 `HTTP POST` 方式打入 `tranquility`，由 tranquility 自动打入 druid  
 
 
 ## 实际线上流程:  
 
-因为公司只支持从 kafka 集群拉取数据，所以我们经过中间件转发数据后，还需要打回 kafka  
+因为公司只支持从 kafka 集群拉取数据，所以我们经过中间件转发数据后，还需要打回 kafka  
 [kafka] -> 中间件 -> [kafka_new -> traquility -> druid]  
 
-如果支持 http post 方式打入集群，则可以通过修改 `kafka/kafkaConsumer.go` 直接略过 producer 使用 http 打入 `traquility`
+如果支持 http post 方式打入集群，则可以通过修改 `kafka/kafkaConsumer.go` 直接略过 producer 使用 http 打入 `traquility`
