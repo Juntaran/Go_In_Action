@@ -4,13 +4,16 @@
   * Date:   2018/3/23 14:59
   */
 
-package utils
+package kafka
 
 import (
 	"io/ioutil"
 	//"fmt"
 	"gopkg.in/yaml.v2"
 )
+
+var Data = GetKafkaData()
+var BrokerList string
 
 type KafkaTopic struct {
 	Brokers 	string
@@ -35,3 +38,4 @@ func GetKafkaData() KafkaTopic {
 	//d, _ := yaml.Marshal(&t)
 	//fmt.Println(string(d))
 }
+

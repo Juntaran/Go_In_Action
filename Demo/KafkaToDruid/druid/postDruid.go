@@ -15,7 +15,7 @@ import (
 
 func DoPost(serviceName, jsonString string)  {
 	//fmt.Println("Do Post", serviceName, jsonString)
-	url := "http://localhost:8200/v1/post/test"
+	url := "http://localhost:8200/v1/post/miui_fast"
 	// json
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer([]byte(jsonString)))
 	req.Header.Set("Content-Type", "application/json")

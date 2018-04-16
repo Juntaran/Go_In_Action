@@ -15,12 +15,15 @@ import (
 	"strings"
 
 	"github.com/Shopify/sarama"
+	"github.com/ivpusic/grpool"
 
 	"KafkaToDruid/utils"
 )
 
-var Data = utils.GetKafkaData()
-var BrokerList string
+// goroutine pool
+// 100  个 worker
+// 1000 大小的队列
+var Pool = grpool.NewPool(100, 1000)
 
 // 消费者
 func consumer(topic, offset string, partition int) {
@@ -67,7 +70,22 @@ func consumer(topic, offset string, partition int) {
 		//fmt.Printf("Key:       %s\n", string(msg.Key))
 		//fmt.Printf("Value:     %s\n", string(msg.Value))
 		//fmt.Println()
-		utils.KafkaToJson(string(msg.Value))
+		ret, err := utils.KafkaToJson(string(msg.Value))
+		if err != nil {
+			//fmt.Println(err)
+			continue
+		} else {
+			// 如果 druid 集群可以接收 HTTP POST 方式发送的数据，使用 DoPost()
+			//druid.DoPost("test", ret)
+
+			// 如果 druid 集群只能从 Kafka 消费数据，使用 DoProducer()
+			//DoProducer(ret)
+
+			// 任务入队
+			Pool.JobQueue <- func() {
+				producer("test", ret)
+			}
+		}
 	}
 
 	if err := c.Close(); err != nil {
@@ -79,7 +97,8 @@ func conTest(topic, offset string, partition int)  {
 	fmt.Println("topic:", topic, "partition", partition)
 }
 
-func DoKafka(state string) {
+func DoConsumer(state string) {
+	InitProducer()
 	fmt.Println(BrokerList)
 	if state == "test" {
 		// 测试处理 单 topic 单 partition
@@ -92,4 +111,5 @@ func DoKafka(state string) {
 			}
 		}
 	}
+	//defer Pool.Release()
 }

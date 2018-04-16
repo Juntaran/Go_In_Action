@@ -1,0 +1,16 @@
+{
+  "queryType" : "topN",
+  "dataSource" : "test",
+  "intervals" : ["2018-03-27/2018-03-29"],
+  "granularity" : "all",
+  "dimension" : "hostname",
+  "metric" : "latencyMs",
+  "threshold" : 2,
+  "aggregations" : [
+    {
+      "name": "latencyMs",
+      "type": "doubleSum",
+      "fieldName": "request_time"
+    }
+  ]
+}

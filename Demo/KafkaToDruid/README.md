@@ -11,7 +11,7 @@ go get -u gopkg.in/yaml.v2
 ## Nginx 日志格式如下:  
 
 ``` nginx
-log_format testlog '$http_host\t$server_addr\t$hostname\t$remote_addr\t$http_x_forwarded_for\t$time_local\t$request_uri\t$request_length\t$bytes_sent\t$request_time\t$status\t$upstream_addr\t$upstream_response_time\t$scheme';
+log_format milog '$http_host\t$server_addr\t$hostname\t$remote_addr\t$http_x_forwarded_for\t$time_local\t$request_uri\t$request_length\t$bytes_sent\t$request_time\t$status\t$upstream_addr\t$upstream_response_time\t$scheme';
 ```
 
 对应着:  
@@ -33,6 +33,12 @@ log_format testlog '$http_host\t$server_addr\t$hostname\t$remote_addr\t$http_x_f
 13 scheme
 ```
 
+## 日志处理流程:  
+
+NginxLog -> td_agent -> lcs -> kafka -> `kafkaConsumer -> kafka2json -> postDruid` -> tranquility -> druid
+
+其中高亮为 `KafkaToDruid` 中间件的文件名，相关操作可以直接查看  
+
 ## 使用方法:  
 
 druid 部署详情参考 [github/Juntaran/Druid](https://github.com/Juntaran/Note/blob/master/Data_Mining-Machine_Learning/Druid/Druid%E9%83%A8%E7%BD%B2.md)  
@@ -53,24 +59,27 @@ java `cat conf-quickstart/druid/overlord/jvm.config | xargs` -cp "conf-quickstar
 java `cat conf-quickstart/druid/middleManager/jvm.config | xargs` -cp "conf-quickstart/druid/_common:conf-quickstart/druid/middleManager:lib/*" io.druid.cli.Main server middleManager
 
 # 开启 tranquility
-cp $GOPATH/src/KafkaToDruid/druid/test.json tranquility-distribution-0.8.0/conf
+cp $GOPATH/src/KafkaToDruid/druid/miuiServer.json tranquility-distribution-0.8.0/conf
 cd tranquility-distribution-0.8.0
-bin/tranquility server -configFile ./conf/test.json
+bin/tranquility server -configFile ./conf/miuiServer.json
 
 # 开启 KafkaToDruid 中间件
 go run main.go > ret.txt
 ```
 
-## 中间件处理策略:  
+## 中间件处理策略:  
 
-1. 读取 yaml 文件，获得 `kafka-topic`、`topic` 以及每个 topic 对应的 `partition`  
-2. 分别对每个 topic 的 partition 开启一个新 goroutine  
-3. 每个 goroutine 连接 kafka 拉取对应 `topic` 对应 `partition` 的数据  
-4. 数据转换为 json 格式，该格式与 `tranquility` 的 `miuiServer.json` 对应  
-5. json 以 `HTTP POST` 方式打入 `tranquility`，由 tranquility 自动打入 druid  
+1. 热更新组件，定时查询 yaml 配置文件 md5 是否有改变，如果有增加会开启新的 goroutine 支持，不能减少
+2. 读取 yaml 文件，获得 `kafka-topic`、`topic` 以及每个 topic 对应的 `partition`  
+3. 分别对每个 topic 的 partition 开启一个新 goroutine  
+4. 每个 goroutine 连接 kafka 拉取对应 `topic` 对应 `partition` 的数据  
+5. 数据转换为 json 格式，该格式与 `tranquility` 的 `miuiServer.json` 对应  
+6. json 以 `HTTP POST` 方式打入 `tranquility`，由 tranquility 自动打入 druid  
 
 
-## 存在的问题:  
+## 实际线上流程:  
 
-kafka 的数据不会实时打入，会有几分钟到十几分钟的延迟  
-本地搭建的 kafka 0.8.11 没有此问题，线上 kafka 存在该问题  
+因为公司只支持从 kafka 集群拉取数据，所以我们经过中间件转发数据后，还需要打回 kafka  
+[kafka] -> 中间件 -> [kafka_new -> traquility -> druid]  
+
+如果支持 http post 方式打入集群，则可以通过修改 `kafka/kafkaConsumer.go` 直接略过 producer 使用 http 打入 `traquility`
