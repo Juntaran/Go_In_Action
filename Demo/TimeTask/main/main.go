@@ -16,5 +16,6 @@ func test()  {
 }
 
 func main() {
-	TimeTask.DoTimeTask(test, 10)
+	//TimeTask.DoTimeTask(test, 2)
+	TimeTask.DoTimeTask2(test, 2, 3)
 }
