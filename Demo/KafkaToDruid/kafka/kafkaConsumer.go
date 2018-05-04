@@ -23,7 +23,7 @@ import (
 // goroutine pool
 // 100  个 worker
 // 1000 大小的队列
-var Pool = grpool.NewPool(100, 1000)
+var Pool = grpool.NewPool(2400, 1000)
 
 // 消费者
 func consumer(topic, offset string, partition int) {
