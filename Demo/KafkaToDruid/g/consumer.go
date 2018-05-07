@@ -24,7 +24,6 @@ var Exit chan struct{}
 // 消费者
 func consumer(topic, offset string, partition int) {
 	fmt.Println("start init map consumer")
-	//brokerlist := "zjy-hadoop-kafka01.bj:21500,zjy-hadoop-kafka02.bj:21500,zjy-hadoop-kafka03.bj:21500,zjy-hadoop-kafka04.bj:21500,zjy-hadoop-kafka05.bj:21500,zjy-hadoop-kafka06.bj:21500,zjy-hadoop-kafka07.bj:21500,zjy-hadoop-kafka08.bj:21500,zjy-hadoop-kafka09.bj:21500,zjy-hadoop-kafka10.bj:21500,zjy-hadoop-kafka11.bj:21500,zjy-hadoop-kafka12.bj:21500,zjy-hadoop-kafka13.bj:21500,zjy-hadoop-kafka14.bj:21500,zjy-hadoop-kafka15.bj:21500,zjy-hadoop-kafka16.bj:21500,zjy-hadoop-kafka17.bj:21500,zjy-hadoop-kafka18.bj:21500,zjy-hadoop-kafka19.bj:21500,zjy-hadoop-kafka20.bj:21500,zjy-hadoop-kafka21.bj:21500,zjy-hadoop-kafka22.bj:21500,zjy-hadoop-kafka23.bj:21500,zjy-hadoop-kafka24.bj:21500,zjy-hadoop-kafka25.bj:21500,zjy-hadoop-kafka26.bj:21500,zjy-hadoop-kafka27.bj:21500,zjy-hadoop-kafka28.bj:21500,zjy-hadoop-kafka29.bj:21500,zjy-hadoop-kafka30.bj:21500,zjy-hadoop-kafka31.bj:21500,zjy-hadoop-kafka32.bj:21500"
 	brokerlist := BrokerList
 
 	var logger = log.New(os.Stderr, "", log.LstdFlags)
