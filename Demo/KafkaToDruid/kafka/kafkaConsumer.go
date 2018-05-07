@@ -18,12 +18,13 @@ import (
 	"github.com/ivpusic/grpool"
 
 	"KafkaToDruid/utils"
+	"KafkaToDruid/g"
 )
 
 // goroutine pool
 // 100  个 worker
 // 1000 大小的队列
-var Pool = grpool.NewPool(100, 1000)
+var Pool = grpool.NewPool(2400, 100)
 
 // 消费者
 func consumer(topic, offset string, partition int) {
@@ -47,7 +48,7 @@ func consumer(topic, offset string, partition int) {
 		logger.Fatalln("Invalid initial offset:", offset)
 	}
 
-	c, err := sarama.NewConsumer(strings.Split(BrokerList, ","), nil)
+	c, err := sarama.NewConsumer(strings.Split(g.BrokerList, ","), nil)
 	if err != nil {
 		logger.Fatalln(err)
 	}
@@ -70,20 +71,20 @@ func consumer(topic, offset string, partition int) {
 		//fmt.Printf("Key:       %s\n", string(msg.Key))
 		//fmt.Printf("Value:     %s\n", string(msg.Value))
 		//fmt.Println()
-		ret, err := utils.KafkaToJson(string(msg.Value))
+		ret, err := utils.KafkaToJson(string(msg.Value), g.UriMap)
 		if err != nil {
 			//fmt.Println(err)
 			continue
 		} else {
 			// 如果 druid 集群可以接收 HTTP POST 方式发送的数据，使用 DoPost()
-			//druid.DoPost("test", ret)
+			//druid.DoPost("miui_fast", ret)
 
 			// 如果 druid 集群只能从 Kafka 消费数据，使用 DoProducer()
 			//DoProducer(ret)
 
 			// 任务入队
 			Pool.JobQueue <- func() {
-				producer("test", ret)
+				producer("miui_fast_data_nginx_log", ret)
 			}
 		}
 	}
@@ -99,15 +100,20 @@ func conTest(topic, offset string, partition int)  {
 
 func DoConsumer(state string) {
 	InitProducer()
-	fmt.Println(BrokerList)
+	fmt.Println(g.BrokerList)
 	if state == "test" {
 		// 测试处理 单 topic 单 partition
-		consumer("test", "newest", 0)
+		consumer("nginx_cash", "newest", 0)
+	} else if state == "init" {
+		// 消费十秒
+		for i := 0; i < len(g.Data.Topics); i++ {
+			consumer(g.Data.Topics[i].TopicName, "newest", 0)
+		}
 	} else {
 		// 所有 topic 并遍历所有 partition
-		for i := 0; i < len(Data.Topics); i++ {
-			for j := 0; j < Data.Topics[i].Partition; j++ {
-				go consumer(Data.Topics[i].TopicName, "newest", j)
+		for i := 0; i < len(g.Data.Topics); i++ {
+			for j := 0; j < g.Data.Topics[i].Partition; j++ {
+				go consumer(g.Data.Topics[i].TopicName, "newest", j)
 			}
 		}
 	}

@@ -10,11 +10,14 @@ import (
 	"strings"
 	"errors"
 	"bytes"
-	// "fmt"
+	"strconv"
+
+	"github.com/orcaman/concurrent-map"
 )
 
-func KafkaToJson(testStr string) (string, error) {
-	
+func KafkaToJson(testStr string, m cmap.ConcurrentMap) (string, error) {
+	// testStr = "api.ad.xiaomi.com	10.132.10.54	c4-miui-l7-data03.bj	180.106.200.165	-	25/Mar/2018:13:38:45 +0800	/desktopfolder/uploadLogAdSDK	2168	253	0.001	200	10.132.28.50:8098	-0.001	Dalvik/2.1.0 (Linux; U; Android 7.1.2; MI 5X MIUI/V9.2.1.0.NDBCNEK)	http"
+
 	s := strings.Split(testStr, "\t")
 
 	// 校验 testStr
@@ -25,10 +28,13 @@ func KafkaToJson(testStr string) (string, error) {
 		s[12] = "0"
 		return "", errors.New("Error: 日志格式不对")
 	}
+	if _, ok := m.Get(s[6]); !ok {
+		return "", errors.New("Error:" + s[6] + "不在白名单")
+	}
 
 	// 正式代码
 	timestamp := NginxTimeConvert(s[5])
-	//var ret = "{\"time\": \"" + timestamp + "\", \"http_host\": \"" + s[0] + "\", \"server_addr\": \"" + s[1] + "\", \"hostname\": \"" + s[2] + "\", \"remote_addr\": \"" + s[3] + "\", \"http_x_forwarded_for\": \"" + s[4] + "\", \"time_local\": \"" + s[5] + "\", \"request_uri\": \"" + DoUri(s[6], 2) + "\", \"request_length\": " + s[7] + ", \"bytes_sent\": " + s[8] + ", \"request_time\": " + s[9] + ", \"status\": " + s[10] + ", \"upstream_addr\": \"" + s[11] + "\", \"upstream_response_time\": " + s[12] + "\", \"scheme\": \"" + s[13] + "\"}"
+	//var ret = "{\"time\": \"" + timestamp + "\", \"http_host\": \"" + s[0] + "\", \"server_addr\": \"" + s[1] + "\", \"hostname\": \"" + s[2] + "\", \"remote_addr\": \"" + s[3] + "\", \"http_x_forwarded_for\": \"" + s[4] + "\", \"time_local\": \"" + s[5] + "\", \"request_uri\": \"" + DoUri(s[6], 2) + "\", \"request_length\": " + s[7] + ", \"bytes_sent\": " + s[8] + ", \"request_time\": " + s[9] + ", \"status\": " + s[10] + ", \"upstream_addr\": \"" + s[11] + "\", \"upstream_response_time\": " + s[12] + ", \"http_user_agent\": \"" + s[13] + "\", \"scheme\": \"" + s[14] + "\"}"
 
 	// 测试无需转换格式
 	// ret := testStr
@@ -55,21 +61,29 @@ func KafkaToJson(testStr string) (string, error) {
 	buf.WriteString(", \"bytes_sent\": ")
 	buf.WriteString(s[8])
 	buf.WriteString(", \"request_time\": ")
-	buf.WriteString(s[9])
+	rt, _ := strconv.ParseFloat(s[9], 32)
+	rTime := strconv.FormatFloat(rt*1000, 'E', -1, 64)[:5]
+	if strings.Contains(rTime, "E") {
+		buf.WriteString("0.000")
+	} else {
+		buf.WriteString(rTime)
+	}
 	buf.WriteString(", \"status\": ")
 	buf.WriteString(s[10])
 	buf.WriteString(", \"upstream_addr\": \"")
 	buf.WriteString(s[11])
 	buf.WriteString("\", \"upstream_response_time\": ")
 	buf.WriteString(s[12])
-	buf.WriteString("\", \"scheme\": \"")
+	buf.WriteString(", \"http_user_agent\": \"")
 	buf.WriteString(s[13])
+	buf.WriteString("\", \"scheme\": \"")
+	buf.WriteString(s[14])
 	buf.WriteString("\"}")
 
 	var ret = buf.String()
 
-	// fmt.Println("正常日志:", s)
-	// fmt.Println("经转换后:", ret)
+	//fmt.Println("正常日志:", s)
+	//fmt.Println("经转换后:", ret)
 
 	return ret, nil
 }

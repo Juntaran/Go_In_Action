@@ -8,12 +8,13 @@ package kafka
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"strings"
-
+	"io/ioutil"
 	"github.com/Shopify/sarama"
 	"github.com/rcrowley/go-metrics"
+
+	"KafkaToDruid/g"
 )
 
 var ProducerG 	sarama.SyncProducer
@@ -27,7 +28,7 @@ func InitProducer() {
 	ConfigG.Producer.Return.Successes = true
 	ConfigG.Producer.Partitioner = sarama.NewRandomPartitioner
 
-	ProducerG, err = sarama.NewSyncProducer(strings.Split(BrokerList, ","), ConfigG)
+	ProducerG, err = sarama.NewSyncProducer(strings.Split(g.BrokerList, ","), ConfigG)
 
 	// 初始化全局变量
 	//ProducerG = producer
@@ -115,11 +116,11 @@ func producer(topic, value string) {
 
 	// 发送数据
 	//partition, offset, err := producer.SendMessage(message)
-	partition, offset, err := ProducerG.SendMessage(message)
+	partition, _, err := ProducerG.SendMessage(message)
 	if err != nil {
 		fmt.Println("Failed to produce message:", err)
 	} else if !silent {
-		fmt.Printf("topic=%s\tpartition=%d\toffset=%d\n", topic, partition, offset)
+		//fmt.Printf("topic=%s\tpartition=%d\toffset=%d\n", topic, partition, offset)
 	}
 	if showMetrics {
 		metrics.WriteOnce(ConfigG.MetricRegistry, os.Stderr)
@@ -139,16 +140,18 @@ func stdinAvailable() bool {
 	return (stat.Mode() & os.ModeCharDevice) == 0
 }
 
-// func proTest()  {
-// 	for i := 0; i < len(Data.Topics); i++ {
-// 		fmt.Println("fast_" + strings.Split(Data.Topics[i].TopicName, "_")[1])
-// 	}
-// }
+func proTest()  {
+	for i := 0; i < len(g.Data.Topics); i++ {
+		fmt.Println("miui_fast_" + strings.Split(g.Data.Topics[i].TopicName, "_")[1] + "_nginx_log")
+	}
+}
 
+// 不能为每一条数据开启一个 goroutine
 // 应该做成 goroutine pool
 func DoProducer(jsonStr string)  {
 	//fmt.Println(BrokerList)
-	for i := 0; i < len(Data.Topics); i++ {
-		producer("test", jsonStr)
+	for i := 0; i < len(g.Data.Topics); i++ {
+		//producer("fast_" + strings.Split(Data.Topics[i].TopicName, "_")[1], jsonStr)
+		producer("miui_fast_cash_nginx_log", jsonStr)
 	}
 }

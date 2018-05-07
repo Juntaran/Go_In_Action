@@ -4,11 +4,10 @@
   * Date:   2018/3/23 14:59
   */
 
-package kafka
+package g
 
 import (
 	"io/ioutil"
-	//"fmt"
 	"gopkg.in/yaml.v2"
 )
 
