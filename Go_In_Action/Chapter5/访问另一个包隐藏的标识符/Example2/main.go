@@ -7,7 +7,7 @@
 package main
 
 import (
-	"Go_In_Action/Go_In_Action/Chapter5/访问另一个包隐藏的标识符/Example2/entities"
+	"github.com/Juntaran/Go_In_Action/github.com/Juntaran/Go_In_Action/Chapter5/访问另一个包隐藏的标识符/Example2/entities"
 	"fmt"
 )
 

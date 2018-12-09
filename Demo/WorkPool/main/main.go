@@ -9,7 +9,7 @@ package main
 import (
 	"flag"
 	"fmt"
-	"Go_In_Action/Demo/WorkPool"
+	"github.com/Juntaran/Go_In_Action/Demo/WorkPool"
 	"net/http"
 )
 

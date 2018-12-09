@@ -9,7 +9,7 @@ TCP端口转发
        ./Tcp_Forward -l=:8000 -d=127.0.0.1:1788,127.0.0.1:1789
     
     
-2. 使用[WorkPool](https://github.com/Juntaran/Go_In_Action/tree/master/Demo/WorkPool)进行测试
+2. 使用[WorkPool](https://github.com/Juntaran/github.com/Juntaran/Go_In_Action/tree/master/Demo/WorkPool)进行测试
 
         ./queued -n=4 -http=localhost:8000          // 被监听端口
         ./queued -n=4 -http=localhost:1788          // 转发端口1

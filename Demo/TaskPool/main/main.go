@@ -8,7 +8,7 @@ package main
 
 import (
 	"fmt"
-	"Go_In_Action/Demo/TaskPool"
+	"github.com/Juntaran/Go_In_Action/Demo/TaskPool"
 	"time"
 )
 

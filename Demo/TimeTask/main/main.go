@@ -7,7 +7,7 @@
 package main
 
 import (
-	"Go_In_Action/Demo/TimeTask"
+	"github.com/Juntaran/Go_In_Action/Demo/TimeTask"
 	"fmt"
 )
 

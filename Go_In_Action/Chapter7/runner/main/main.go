@@ -7,7 +7,7 @@
 package main
 
 import (
-	"Go_In_Action/Go_In_Action/Chapter7/runner"
+	"github.com/Juntaran/Go_In_Action/github.com/Juntaran/Go_In_Action/Chapter7/runner"
 	"log"
 	"os"
 	"time"

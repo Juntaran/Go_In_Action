@@ -9,7 +9,7 @@ package main
 import (
 	"log"
 	"time"
-	"Go_In_Action/Demo/BlockchainBasic"
+	"github.com/Juntaran/Go_In_Action/Demo/BlockchainBasic"
 	"github.com/davecgh/go-spew/spew"
 )
 

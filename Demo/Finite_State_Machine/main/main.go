@@ -8,7 +8,7 @@ package main
 
 import (
 	"fmt"
-	. "Go_In_Action/Demo/Finite_State_Machine"
+	. "github.com/Juntaran/Go_In_Action/Demo/Finite_State_Machine"
 )
 
 var (

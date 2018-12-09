@@ -8,7 +8,7 @@ package main
 
 import (
 	"net/http"
-	"Go_In_Action/Demo/Upload"
+	"github.com/Juntaran/Go_In_Action/Demo/Upload"
 )
 
 func main() {

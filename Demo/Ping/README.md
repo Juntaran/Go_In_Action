@@ -7,7 +7,7 @@ Linux:
 
 Windows:
 
-    cd ~\Go_In_Action\Demo\Ping\main
+    cd ~\github.com/Juntaran/Go_In_Action\Demo\Ping\main
     go build -o myPing.exe main.go
     main.exe -host=www.baidu.com -n=3
  

@@ -8,7 +8,7 @@ package LoadGen
 
 import (
 	"time"
-	"Go_In_Action/Go_Concurrent_Programming/Chapter4/LoadGen/lib"
+	"github.com/Juntaran/Go_In_Action/Go_Concurrent_Programming/Chapter4/LoadGen/lib"
 	"context"
 )
 

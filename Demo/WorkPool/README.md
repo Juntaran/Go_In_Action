@@ -11,7 +11,7 @@ Linux:
 
 Windows:
 
-    cd ~\Go_In_Action\Demo\WorkPool\main
+    cd ~\github.com/Juntaran/Go_In_Action\Demo\WorkPool\main
     go build -o queued.exe main.go
     queued.exe -n=4 -http=localhost:8000
     
